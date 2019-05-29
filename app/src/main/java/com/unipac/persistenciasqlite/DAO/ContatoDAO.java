@@ -16,14 +16,14 @@ import static com.unipac.persistenciasqlite.Model.Contato.*;
 public class ContatoDAO {
     private DatabaseHandler dbHandler = null;
 
-    private String[] allCollumns = {ID, NOME, TELEFONE};
+    private String[] allCollumns = {Contato.ID, Contato.NOME, Contato.TELEFONE};
 
     public ContatoDAO(Context context){
         dbHandler = new DatabaseHandler(context);
     }
 
     //Adicionar novo Contato
-    public void addContato(Contato contato){
+    public boolean addContato(Contato contato){
         SQLiteDatabase db = dbHandler.getWritableDatabase(); //abre o banco para leitura e gravação
 
         ContentValues values = new ContentValues(); //cria o objeto para preencher valores nas tabelas
@@ -33,8 +33,9 @@ public class ContatoDAO {
 
         //Inserindo a linha
         long insertId = db.insert(contato.TABLE_CONTATO, null, values);
-//        return insertId > 0 ? Boolean.TRUE : Boolean.FALSE;
-        db.close();
+        return insertId > 0 ? Boolean.TRUE : Boolean.FALSE;
+
+//        db.close();
 
     }
 
@@ -43,6 +44,7 @@ public class ContatoDAO {
         SQLiteDatabase db = dbHandler.getReadableDatabase();
         Cursor cursor = db.query(Contato.TABLE_CONTATO, allCollumns, ID + " = " +
                 id, null,null,null,null);
+        cursor.moveToFirst();
 
         Contato contato = new Contato();
 
@@ -60,7 +62,7 @@ public class ContatoDAO {
         SQLiteDatabase db = dbHandler.getReadableDatabase();
         Cursor cursor = db.query(TABLE_CONTATO, allCollumns, null, null, null,null, null,null);
 
-        List<Contato>contatoList = new ArrayList<Contato>();
+        List<Contato>contatoList = new ArrayList<>();
 
 //        String selectQuery = "SELECT * FROM" + contato.TABLE_NAME;
 //        Cursor cursor = db.rawQuery(selectQuery, null);
@@ -72,14 +74,17 @@ public class ContatoDAO {
 
             do{
                 Contato contato = new Contato();
-                contato.setId(Integer.parseInt(cursor.getString(0)));
-                contato.setNome(cursor.getString(1));
-                contato.setTelefone(cursor.getString(2));
+                contatoList.add(contato);
+
+                contato.setId(Integer.parseInt(cursor.getString(idxId)));
+                contato.setNome(cursor.getString(idxNome));
+                contato.setTelefone(cursor.getString(idxTelefone));
 
                 //Adiciona o contato na lista de contatos.
                 contatoList.add(contato);
             }while (cursor.moveToNext());
         }
+        cursor.close();
         //Retorna a lista de contatos
         return contatoList;
 
@@ -102,7 +107,7 @@ public class ContatoDAO {
 
 
     //Atualizar o contato
-    public int updateContato(Contato contato){
+    public Contato updateContato(Contato contato) {
         SQLiteDatabase db = dbHandler.getWritableDatabase(); //Abre o banco para leitura e gravação
 
         ContentValues values = new ContentValues();
@@ -113,22 +118,21 @@ public class ContatoDAO {
 // **Erro
 //        return db.update(TABLE_CONTATO, values, contato.ID + " = ",)
 //                new String[] {String.valueOf(contato.getId())};
-
-
-
+        return contato;
     }
+//    }
 
-    //Deletando o contato por ID
-    public void deleteContato(Contato contato){
-        SQLiteDatabase db = dbHandler.getWritableDatabase(); //Abre o banco para leitura e gravação
+//    Deletando o contato por ID
+//    public void deleteContato(Contato contato){
+//        SQLiteDatabase db = dbHandler.getWritableDatabase(); //Abre o banco para leitura e gravação
 // **Erro
 //                db.delete(TABLE_CONTATO, contato.ID + "=?",)
 //                        new String[]{String.valueOf(contato.getId())};
 
-        db.close(); // fecha o banco
-
-
-    }
+//        db.close(); // fecha o banco
+//
+//
+//    }
 
 
 }
